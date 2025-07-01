@@ -1,7 +1,7 @@
 from enum import Enum
 
 class TextType(Enum):
-    PLAIN="plain"
+    TEXT="text"
     ITALIC="italic"
     BOLD="bold"
     CODE="code"
@@ -26,3 +26,6 @@ class TextNode:
             return f"TextNode({self.text}, {self.text_type.value}, {self.url})"
         else: 
             return f"TextNode({self.text}, {self.text_type.value})"
+    
+
+  
