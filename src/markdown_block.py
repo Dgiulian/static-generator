@@ -175,3 +175,11 @@ if __name__ == "__main__":
     #         html,
     #         "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
     #     )
+
+
+def extract_title(markdown):
+
+    for l in markdown.split("\n"):
+        if markdown.startswith("# "):
+            return markdown[2:].strip()
+    raise Exception("It's not a header")
