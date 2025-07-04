@@ -4,25 +4,29 @@ from textnode import TextNode, TextType
 
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
     new_nodes = []
-    for node in old_nodes:
-        if node.text_type != TextType.TEXT:
-            new_nodes.append(node)
+    for old_node in old_nodes:
+        if old_node.text_type != TextType.TEXT:
+            new_nodes.append(old_node)
             continue
 
-        if not node.text:
-            continue
+        parts = re.split(f"({re.escape(delimiter)})", old_node.text)
 
-        parts = node.text.split(delimiter)
-        if len(parts) % 2 == 0:
+        if parts.count(delimiter) % 2 != 0:
             raise ValueError("Invalid markdown, unclosed delimiter")
 
-        for i, part in enumerate(parts):
+        i = 0
+        while i < len(parts):
+            part = parts[i]
             if part == "":
+                i += 1
                 continue
-            if i % 2 == 0:
-                new_nodes.append(TextNode(part, TextType.TEXT))
+
+            if part == delimiter:
+                new_nodes.append(TextNode(parts[i + 1], text_type))
+                i += 2  # Skip the content part as well
             else:
-                new_nodes.append(TextNode(part, text_type))
+                new_nodes.append(TextNode(part, TextType.TEXT))
+            i += 1
     return new_nodes
 
 
@@ -104,12 +108,13 @@ def text_to_textnodes(text):
     nodes = split_nodes_link(nodes)
     nodes = split_nodes_delimiter(nodes, "**", TextType.BOLD)
     nodes = split_nodes_delimiter(nodes, "*", TextType.ITALIC)
+    nodes = split_nodes_delimiter(nodes, "_", TextType.ITALIC)
     nodes = split_nodes_delimiter(nodes, "`", TextType.CODE)
     return nodes
 
 
 def markdown_to_blocks(markdown):
-    blocks = [b.strip() for b in markdown.split("\n\n") if b.strip() is not ""]
+    blocks = [b.strip() for b in markdown.split("\n\n") if b.strip() != ""]
     return blocks
 
 

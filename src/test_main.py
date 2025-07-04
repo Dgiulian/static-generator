@@ -2,7 +2,7 @@ import unittest
 
 from leafnode import LeafNode
 from textnode import TextNode, TextType
-from main import text_node_to_html_node
+from textnode import text_node_to_html_node
 
 
 class TestMain(unittest.TestCase):
@@ -11,5 +11,3 @@ class TestMain(unittest.TestCase):
         html_node = text_node_to_html_node(node)
         self.assertEqual(html_node.tag, None)
         self.assertEqual(html_node.value, "This is a text node")
-
-    

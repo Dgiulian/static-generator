@@ -1,4 +1,5 @@
 from htmlnode import HTMLNode
+from enum import Enum
 
 class ParentNode(HTMLNode):
   def __init__(self, tag, children, props=None):
@@ -16,4 +17,8 @@ class ParentNode(HTMLNode):
     for child in self.children:
       children_html += child.to_html()
 
-    return f"<{self.tag}{self.props_to_html()}>{children_html}</{self.tag}>"
+    tag = self.tag
+    if isinstance(self.tag, Enum):
+      tag = self.tag.value
+
+    return f"<{tag}{self.props_to_html()}>{children_html}</{tag}>"
