@@ -43,23 +43,48 @@ def generate_page(from_path, template_path, dest_path):
         d.write(template)
 
 
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+
+    if not os.path.isdir(dir_path_content):
+        print(f"{dir_path_content} is not adirectory")
+        raise Exception(f"{dir_path_content} is not adirectory")
+
+    for l in os.listdir(dir_path_content):
+        new_from = os.path.join(dir_path_content, l)
+        new_dest = os.path.join(dest_dir_path, l)
+        if os.path.isfile(new_from) and new_from.endswith(".md"):
+
+            dest_file = os.path.join(dest_dir_path, l.replace(".md", ".html"))
+
+            generate_page(
+                from_path=new_from,
+                template_path=template_path,
+                dest_path=dest_file,
+            )
+        elif os.path.isdir(new_from):
+            if not os.path.exists(new_dest):
+                os.makedirs(new_dest)
+            generate_pages_recursive(
+                dir_path_content=new_from,
+                template_path=template_path,
+                dest_dir_path=new_dest,
+            )
+        else:
+            print(f"Nothing to do with {new_from} and {new_dest}")
+            print(f"Nothing to do with {new_from} and {new_dest}")
+
+
 def main():
     source = "static"
     dest = "public"
 
     deleteContent(dest)
     copyContent(source, dest)
-    generate_page(
-        from_path=os.path.join("content", "index.md"),
+    generate_pages_recursive(
+        dir_path_content=os.path.join("content"),
         template_path=os.path.join("template.html"),
-        dest_path=os.path.join("public", "index.html"),
+        dest_dir_path=os.path.join("public"),
     )
-
-
-if __name__ == "__main__":
-    main()
-
-    copyContent("static", "public")
 
 
 if __name__ == "__main__":
