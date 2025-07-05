@@ -2,6 +2,7 @@ from textnode import TextNode, TextType
 import re
 import os
 import shutil
+import sys
 from markdown_block import markdown_to_html_node, extract_title
 
 
@@ -23,7 +24,7 @@ def deleteContent(dest):
         shutil.rmtree(dest)
 
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, basepath):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
 
     with open(from_path, "r") as fp:
@@ -38,12 +39,16 @@ def generate_page(from_path, template_path, dest_path):
     title = extract_title(markdown)
     template = template.replace("{{ Title }}", title)
     template = template.replace("{{ Content }}", html)
+    template = template.replace('href="/', f'href="{basepath}')
+    template = template.replace('src="/', f'src="{basepath}')
 
     with open(dest_path, "w") as d:
         d.write(template)
 
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(
+    dir_path_content, template_path, dest_dir_path, basepath="/"
+):
 
     if not os.path.isdir(dir_path_content):
         print(f"{dir_path_content} is not adirectory")
@@ -60,6 +65,7 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
                 from_path=new_from,
                 template_path=template_path,
                 dest_path=dest_file,
+                basepath=basepath,
             )
         elif os.path.isdir(new_from):
             if not os.path.exists(new_dest):
@@ -68,24 +74,30 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
                 dir_path_content=new_from,
                 template_path=template_path,
                 dest_dir_path=new_dest,
+                basepath=basepath,
             )
         else:
             print(f"Nothing to do with {new_from} and {new_dest}")
             print(f"Nothing to do with {new_from} and {new_dest}")
 
 
-def main():
-    source = "static"
-    dest = "public"
+def main(basepath):
+    static = "static"
+    content = "content"
+    dest = "docs"
 
     deleteContent(dest)
-    copyContent(source, dest)
+    copyContent(static, dest)
     generate_pages_recursive(
-        dir_path_content=os.path.join("content"),
+        dir_path_content=os.path.join(content),
         template_path=os.path.join("template.html"),
-        dest_dir_path=os.path.join("public"),
+        dest_dir_path=os.path.join(dest),
+        basepath=basepath,
     )
 
 
 if __name__ == "__main__":
-    main()
+
+    basepath = "/" if len(sys.argv) < 2 else sys.argv[1]
+    print(f"Building content for basepath: {basepath}")
+    main(basepath)
